@@ -27,7 +27,8 @@ public class ApplicationContextLoaderTest {
 	private ProductItemRepository productItemRepository;
 
 	@Test
-	public void insertionWorking() {
+	public void testAddingOrderItem() {
+		// setup
 		OrderItem persistedOrder = new OrderItem();
 		persistedOrder.setDatePlaced(new Date());
 		persistedOrder.setStoreName("EMAG");
@@ -49,22 +50,38 @@ public class ApplicationContextLoaderTest {
 		productItem.add(productItem2);
 		persistedOrder.setItems(productItem);
 
+		// execute
 		orderRepository.addOrderItem(persistedOrder);
 
+		// verify
 		OrderItem retrievedOrder = orderRepository.getOrderItemById(persistedOrder.getOrderItemId());
 		Assert.assertEquals(persistedOrder, retrievedOrder);
 	}
 
 	@Test
 	public void testSpringDataAutoRepo() {
-		ProductItem product = productItemRepository.findOne(1);
-		Assert.assertEquals("TV", product.getName());
+		// execute
+		List<ProductItem> productItems = productItemRepository.findAll();
+
+		// verify
+		Assert.assertNotNull(productItems);
 	}
 
 	@Test
 	public void testReadByNameIgnoringCase() {
-		List<ProductItem> items = productItemRepository.readByNameIgnoringCase("TV");
+		// setup
+		ProductItem productItem = new ProductItem();
+		productItem.setAddedOnSite(new DateTime(2016, 1, 1, 1, 1).toDate());
+		productItem.setName("Fridge");
+		productItem.setPrice(2.84);
+		productItem.setSpecs("Samsung");
+		productItem.setStock(2);
+		productItemRepository.save(productItem);
 
-		Assert.assertTrue(items.size() > 0);
+		// execute
+		List<ProductItem> items = productItemRepository.readByNameIgnoringCase("Fridge");
+
+		// verify
+		Assert.assertTrue(items.size() == 1);
 	}
 }
